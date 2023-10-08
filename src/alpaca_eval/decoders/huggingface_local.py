@@ -7,7 +7,7 @@ import transformers
 from peft import PeftModel
 from torch.utils.data import Dataset
 from tqdm import tqdm
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, LlamaForCausalLM
 
 from .. import constants, utils
 
@@ -88,7 +88,13 @@ def huggingface_local_completions(
         use_fast=is_fast_tokenizer,
         **model_kwargs,
     )
-    model = AutoModelForCausalLM.from_pretrained(model_name, cache_dir=cache_dir, **model_kwargs).eval()
+    #model = AutoModelForCausalLM.from_pretrained(model_name, cache_dir=cache_dir, **model_kwargs).eval()
+    model = LlamaForCausalLM.from_pretrained(
+        model_name,
+        low_cpu_mem_usage=True,
+        device_map="auto",
+        torch_dtype= torch.float16
+    )
 
     if adapters_name:
         logging.info(f"Merging adapter from {adapters_name}.")
