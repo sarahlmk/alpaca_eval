@@ -154,6 +154,30 @@ def make_prompts(
 
     return prompts, df_out
 
+def get_instructions(
+    df: pd.DataFrame,
+    template: str,
+    batch_size: int = 1,
+) -> tuple[list[str], pd.DataFrame]:
+
+    if df.empty:
+        return [], df
+
+    text_to_format = re.findall(r"{([^ \s]+?)}", template)
+    n_occurrences = Counter(text_to_format)
+    
+    df_out = df.copy()
+    instructions = []
+    # ugly for loops, not trivial to vectorize because of the batching
+    for i in range(0, len(df_out), batch_size):
+        for j in range(batch_size):
+            for to_format in n_occurrences.keys():
+                # replace only first occurrence (that's why we don't use .format)
+                instruction = str(df_out.iloc[i + j][to_format])
+        instructions.append(instruction)
+
+    return instructions
+
 
 def convert_ordinal_to_binary_preference(
     preferences: Union[pd.DataFrame, list[dict[str, Any]]],

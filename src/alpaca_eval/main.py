@@ -192,7 +192,7 @@ def evaluate_from_model(
     annotators_config: AnyPath = DEFAULT_CONFIGS,
     output_path: AnyPath = "auto",
     max_instances: int = None,
-    is_strip_output: bool = True,
+    is_strip_output: bool = False,
     is_load_outputs: bool = True,
     chunksize: int = 64,
     **kwargs,
@@ -283,16 +283,23 @@ def evaluate_from_model(
             curr_outputs = curr_outputs.iloc[:max_instances]
 
         if len(curr_outputs) > 0:
-            prompts, _ = utils.make_prompts(
+            # prompts, _ = utils.make_prompts(
+            #     curr_outputs,
+            #     template=utils.read_or_return(constants.MODELS_CONFIG_DIR / configs["prompt_template"]),
+            # )
+            prompts = utils.get_instructions(
                 curr_outputs,
                 template=utils.read_or_return(constants.MODELS_CONFIG_DIR / configs["prompt_template"]),
             )
             fn_completions = decoders.get_fn_completions(configs["fn_completions"])
-            completions = fn_completions(prompts=prompts, **configs["completions_kwargs"])["completions"]
+            get_completions = fn_completions(prompts=prompts, **configs["completions_kwargs"])
+            completions = get_completions["completions"]
+            responses_messages = get_completions["responses_vllm"]
             if is_strip_output:
                 completions = [c.strip() for c in completions]
             curr_outputs["output"] = completions
             curr_outputs["generator"] = generator
+            curr_outputs["responses_messages"] = responses_messages
 
         if is_loading_old_outputs:
             curr_outputs = pd.concat([old_outputs, curr_outputs], axis=0)
@@ -370,7 +377,7 @@ def make_leaderboard(
 
     reference_outputs : path or data, optional
         The outputs of the reference model. Same format as `all_model_outputs` but without needing `generator`. By
-        default,
+        default
         the reference outputs are the 003 outputs on AlpacaEval set.
 
     fn_add_to_leaderboard : callable or str, optional

@@ -1,12 +1,13 @@
 functionary:
   prompt_template: "functionary/prompt.txt"
-  fn_completions: "vllm_local_completions"
+  fn_completions: "vllm_server_completions"
   completions_kwargs:
-    model_name: "/workspace/functionary-13b" # local path
+    model_name: "musabgultekin/functionary-7b-v1" # local path
     model_kwargs:
       torch_dtype: 'float16'
     max_new_tokens: 2048
     temperature: 0.7
     top_p: 1.0
     do_sample: True
+    stop_token_ids: [32002, 32004]
   pretty_name: "Functionary 13B"

@@ -81,6 +81,9 @@ def get_fn_completions(name: Union[str, Callable]) -> Callable:
             packages = ["vllm", "ray", "transformers"]
             logging.exception(f"You need {packages} to use vllm_completions. Error:")
             raise e
+    elif name == "vllm_server_completions":
+        from .vllm_server import vllm_server_completions
 
+        return vllm_server_completions
     else:
         raise ValueError(f"Unknown decoder: {name}")
