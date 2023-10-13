@@ -4,8 +4,8 @@ example/
 .DS_Store
 .env
 src/**/*.json
-results
-./*.json
+# results
+# ./*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
